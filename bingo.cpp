@@ -1,23 +1,14 @@
 #include <vector>
 #include <iostream>
+#include <utility>
 
-#define ROWS 6
-#define COLS 7
+#define ROWS 5
+#define COLS 5
 
 using namespace std;
 
-class Bingo
-{
-    public:
-    int board [ROWS][COLS] = {0};
-    bool result;
-
-    void printBoard();
-    bool isValid(int i, int j, int player);
-    bool eval();
-};
-
-void Bingo::printBoard()
+// utility functions
+void printBoard(vector <vector <int>> board)
 {
     for (int i = 0; i < ROWS; i++)
     {
@@ -29,46 +20,10 @@ void Bingo::printBoard()
     }
 }
 
-bool Bingo::isValid(int i, int j, int player)
+int evaluate(vector <vector <int>> board)
 {
-    if (i < ROWS && i >= 0 && j < COLS && j >= 0)
-    {
-        if (board[i][j] == 0)
-        {
-            if (i == ROWS-1)
-            {
-                board[i][j] = player;
-                return true;
-            }
-            else
-            {
-                if (board[i+1][j] == 0)
-                {
-                    cout << "Can't Capture The Given Position. Please Try Again";
-                    return false;
-                }
-                else
-                {
-                    board[i][j] = player;
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            cout << "Invalid Position. Please Try Again" << endl;
-            return false;
-        }
-    }
-    else
-    {
-        cout << "Invalid Position. Please Try Again." << endl;
-        return false;
-    }
-}
-
-bool Bingo::eval()
-{
+    // return 1 if player 1 wins, 2 if player 2 wins, 3 if its a draw and 0 otherwise.
+    
     // horizontal check
     for (int i = 0; i < ROWS; i++)
     {
@@ -78,14 +33,13 @@ bool Bingo::eval()
             {
                 if (board[i][j] == board[i][j+1] && board[i][j+1] == board[i][j+2] && board[i][j+2] == board[i][j+3])
                 {
-                    result = 1;
-                    return false;
+                    return board[i][j];
                 }
             }
         }
     } 
 
-    // vecrtical check
+    // vertical check
     for (int i = 0; i < ROWS-3; i++)
     {
         for (int j = 0; j < COLS; j++)
@@ -94,67 +48,106 @@ bool Bingo::eval()
             {
                 if (board[i][j] == board[i+1][j] && board[i+1][j] == board[i+2][j] && board[i+2][j] == board[i+3][j])
                 {
-                    result = 1;
-                    return false;
+                    return board[i][j];
                 }
             }
         }
     } 
 
-    // positive diagonal check
-
-    // negative diagonal check
-
-    // tie check
+    // check if game can be continued
     for (int i = 0; i < ROWS; i++)
     {
-        for (int j = 0; j < COLS-2; j++)
+        for (int j = 0; j < COLS; j++)
         {
             if (board[i][j] == 0)
             {
-                return true;
+                return 0;
             }
         }
     } 
+
+    // draw condition
+    return 3;
+}
+
+bool isValid(vector <vector <int>> &board, int c)
+{
+    if (board[0][c] == 0)
+    {
+        return true;
+    }
     return false;
 }
 
-int main()
+void insert (vector <vector <int>> &board, int c, int player)
 {
-    Bingo B;
-    B.printBoard();
-    int player = 1;
-
-    while(B.eval())
+    if (board[ROWS-1][c] == 0)
     {
-        // accept the coordinates
-        int i, j;
-        cout << "Please enter the position: ";
-        cin >> i >> j;
-
-        if (B.isValid(i, j, player))
-        {
-            // invert the player
-            if (player == 1)
-            {
-                player = 2;
-            }
-            else
-            {
-                player = 1;
-            }
-        }
-        B.printBoard();
+        board[ROWS-1][c] = player;
+        return;
     }
 
-    if (B.result)
+    for (int i = 1; i < ROWS; i++)
     {
-        cout << "//////////" << endl << "Player " << player << " Wins!" << endl << "//////////" << endl;
+        if (board[i][c] > 0)
+        {
+            board[i-1][c] = player;
+            break;
+        }
+    }
+}
+
+int main ()
+{
+    vector <vector <int>> board (ROWS, vector <int> (COLS));
+    printBoard(board);
+
+    while (evaluate(board) == 0)
+    {
+        cout << "Player 1 plays....\n";
+        int c;
+        cout << "Enter your column: ";
+        cin >> c;
+        while (!isValid(board, c))
+        {
+            cout << "Invalid choice. Please choose your column: ";
+            cin >> c;
+        }
+        insert(board, c, 1);
+
+        printBoard(board);
+
+        if (evaluate(board) != 0)
+        {
+            break;
+        }
+
+        cout << "Player 2 plays....\n";
+        cout << "Enter your column: ";
+        cin >> c;
+        while (!isValid(board, c))
+        {
+            cout << "Invalid choice. Please choose your column: ";
+            cin >> c;
+        }
+        insert(board, c, 2);
+        printBoard(board);
+    }
+
+    int x = evaluate(board);
+    if (x == 1)
+    {
+        cout << "Bingo! Player 1 wins the game.";
+    }
+    else if (x == 2)
+    {
+        cout << "Bingo! Player 2 win the game.";
     }
     else
     {
-        cout << "////" << endl << "Draw" << endl << "////" << endl;
+        cout << "The game ends as a draw!";
     }
-    
+    cout << endl;
+
     return 0;
 }
