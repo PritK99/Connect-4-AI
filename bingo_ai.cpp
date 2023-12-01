@@ -54,6 +54,36 @@ int evaluate(vector <vector <int>> board)
         }
     } 
 
+    // Diagonal check (positive slope)
+    for (int i = 0; i < ROWS - 3; i++)
+    {
+        for (int j = 0; j < COLS - 3; j++)
+        {
+            if (board[i][j] == 1 || board[i][j] == 2)
+            {
+                if (board[i][j] == board[i + 1][j + 1] && board[i + 1][j + 1] == board[i + 2][j + 2] && board[i + 2][j + 2] == board[i + 3][j + 3])
+                {
+                    return board[i][j];
+                }
+            }
+        }
+    }
+
+    // Diagonal check (negative slope)
+    for (int i = 3; i < ROWS; i++)
+    {
+        for (int j = 0; j < COLS - 3; j++)
+        {
+            if (board[i][j] == 1 || board[i][j] == 2)
+            {
+                if (board[i][j] == board[i - 1][j + 1] && board[i - 1][j + 1] == board[i - 2][j + 2] && board[i - 2][j + 2] == board[i - 3][j + 3])
+                {
+                    return board[i][j];
+                }
+            }
+        }
+    }
+
     // check if game can be continued
     for (int i = 0; i < ROWS; i++)
     {
